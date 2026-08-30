@@ -1,0 +1,9 @@
+{
+  "name": "project5-lead-recovery-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Aggregate reliability dashboard for the self-healing lead recovery pipeline (Project 5).",
+  "scripts": {
+    "dev": "vercel dev"
+  }
+}
