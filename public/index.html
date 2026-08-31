@@ -481,6 +481,7 @@ function traceStatusClass(status) {
 }
 
 let renderedTraceCount = 0;
+let activePollingInterval = null;
 
 function renderTrace(trace) {
   const traceList = document.getElementById('trace-list');
@@ -521,16 +522,20 @@ async function pollTrace(runId) {
 }
 
 document.getElementById('run-button').addEventListener('click', async () => {
+  if (activePollingInterval !== null) {
+    window.clearInterval(activePollingInterval);
+    activePollingInterval = null;
+  }
+
+  renderTrace([]);
+
   const button = document.getElementById('run-button');
   const traceStatus = document.getElementById('trace-status');
   const runId = 'run_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
-  let pollingInterval;
 
   button.disabled = true;
   button.textContent = 'Running…';
   traceStatus.textContent = runId;
-  renderedTraceCount = 0;
-  renderTrace([]);
 
   const poll = async () => {
     try {
@@ -540,7 +545,8 @@ document.getElementById('run-button').addEventListener('click', async () => {
     }
   };
 
-  pollingInterval = window.setInterval(poll, 700);
+  const runPollingInterval = window.setInterval(poll, 700);
+  activePollingInterval = runPollingInterval;
   poll();
 
   try {
@@ -556,7 +562,8 @@ document.getElementById('run-button').addEventListener('click', async () => {
   } finally {
     await poll();
     window.setTimeout(() => {
-      window.clearInterval(pollingInterval);
+      window.clearInterval(runPollingInterval);
+      if (activePollingInterval === runPollingInterval) activePollingInterval = null;
       button.disabled = false;
       button.textContent = '▶ Run it now';
       traceStatus.textContent = 'Run complete';
